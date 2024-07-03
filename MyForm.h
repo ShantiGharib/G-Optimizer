@@ -18,6 +18,10 @@ using namespace System::IO;
 /// </summary>
 public ref class MyForm : public System::Windows::Forms::Form {
 Form^ Character_Settings_Window;
+String^ Active_Character;
+String^ Team_Member_1;
+String^ Team_Member_2;
+String^ Team_Member_3;
 public:
 MyForm(void)
 {
@@ -1461,6 +1465,7 @@ void InitializeComponent(void)
     this->Albedo_Team_Member_1->Size = System::Drawing::Size(736, 59);
     this->Albedo_Team_Member_1->TabIndex = 2;
     this->Albedo_Team_Member_1->Text = L"-";
+    this->Albedo_Team_Member_1->Leave += gcnew System::EventHandler(this, &MyForm::Albedo_Team_Member_1_Leave);
     // 
     // label34
     // 
@@ -6326,28 +6331,27 @@ tabControl1->SelectedIndex = 0;
 }
 public: System::Void Albedo_Enemy_Level_TextUpdate(System::Object^ sender, System::EventArgs^ e) {
 UIW::Albedo_Enemy_Level = 1 + this->Albedo_Enemy_Level->SelectedIndex;}
-public: System::Void Albedo_Weapons_Lose_Focus(System::Object^ sender, System::EventArgs^ e) {{
+public: System::Void Albedo_Weapons_Lose_Focus(System::Object^ sender, System::EventArgs^ e) {
 int Reference_Number = 0;
 for (int i = 0;i < 170;i++) {
-if (String::CompareOrdinal(this->Albedo_Weapons->Text,UserInterfaceWizard::Variables::Weapon_Array[i].name) == 0) {
+if (String::CompareOrdinal(this->Albedo_Weapons->Text,UIW::Variables::Weapon_Array[i].name) == 0) {
 UIW::Albedo_base_atk_2 = UIW::Variables::Weapon_Array[i].base_atk;
 Reference_Number = 1;
 break;}
 }
 if (Reference_Number == 0) {
 this->Albedo_Weapons->Text = L"Please Reselect a Valid Weapon";}
-}}
+}
 public: System::Void Albedo_Weapons_KeyPress(System::Object^ sender, System::Windows::Forms::KeyPressEventArgs^ e) {
 if (e->KeyChar == 13) {
 Albedo_Artifact_Set->Focus();}
 }
 public: System::Void Buffs_Page_Popup(System::Object^ sender, System::EventArgs^ e) {
 StreamWriter^ Buff_Settings = gcnew StreamWriter("State.txt",false);
-if (tabControl1->SelectedIndex==1) {
-Buff_Settings->WriteLine("1");}
-Buff_Settings->WriteLine(this->Albedo_Team_Member_1->Text);
-Buff_Settings->WriteLine(this->Albedo_Team_Member_2->Text);
-Buff_Settings->WriteLine(this->Albedo_Team_Member_3->Text);
+Buff_Settings->WriteLine(UIW::Variables::Character_Array[tabControl1->SelectedIndex].name);
+Buff_Settings->WriteLine(Team_Member_1);
+Buff_Settings->WriteLine(Team_Member_2);
+Buff_Settings->WriteLine(Team_Member_3);
 Buff_Settings->Close();
 Character_Settings_Window = gcnew UserInterfaceWizard::CharacterSettingsDialogWindow;
 Character_Settings_Window->Show();
@@ -7837,6 +7841,7 @@ Albedo_Settings->WriteLine(this->Albedo_ER_Value->Value);
 Albedo_Settings->Close();}
 public: void Albedo_Load_Settings() {
 StreamReader^ Albedo_Settings = gcnew StreamReader("Albedo.txt",false);
+if (Albedo_Settings != nullptr) {
 this->Albedo_Character_Level->Text = Albedo_Settings->ReadLine();
 this->Albedo_Constellations->Text = Albedo_Settings->ReadLine();
 this->Albedo_Weapons->Text = Albedo_Settings->ReadLine();
@@ -7897,16 +7902,28 @@ this->Albedo_DMG_Percent_Value->Text = Albedo_Settings->ReadLine();
 this->Albedo_CRITDMG_Value->Text = Albedo_Settings->ReadLine();
 this->Albedo_RatePercent_Value->Text = Albedo_Settings->ReadLine();
 this->Albedo_EM_Value->Text = Albedo_Settings->ReadLine();
-this->Albedo_ER_Value->Text = Albedo_Settings->ReadLine();
+this->Albedo_ER_Value->Text = Albedo_Settings->ReadLine();}
 Albedo_Settings->Close();}
+public: void Albedo_Team_Member_Assign() {
+Team_Member_1 = this->Albedo_Team_Member_1->Text;
+Team_Member_2 = this->Albedo_Team_Member_2->Text;
+Team_Member_3 = this->Albedo_Team_Member_3->Text;
+}
 
 public: System::Void Albedo_Page_Leave(System::Object^ sender, System::EventArgs^ e) {
 Albedo_Save_Settings();}
 public: System::Void Albedo_Page_Enter(System::Object^ sender, System::EventArgs^ e) {
-Albedo_Load_Settings();}
+Albedo_Load_Settings();
+Albedo_Team_Member_Assign();
+}
 private: System::Void MyForm_FormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e) {
 if (this->tabControl1->SelectedIndex == 1) {
 Albedo_Save_Settings();} 
 }
+private: System::Void Albedo_Team_Member_1_Leave(System::Object^ sender, System::EventArgs^ e) {
+Albedo_Team_Member_Assign();
+}
+
+
 };
 }
